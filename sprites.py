@@ -28,22 +28,23 @@ class Ball(sprite.Sprite):
         #pygame.sprite - this is required for a pygame sprite
         sprite.Sprite.__init__(self)
         """ You can use an image in here, but this is just a rectangle """
-        self.image = Surface((BALL_SIZE, BALL_SIZE))
-        self.image.fill(BALL_COLOR)
+##        self.image = Surface((BALL_SIZE, BALL_SIZE))
+##        self.image.fill(BALL_COLOR)
 
 
-##        self.image = BALL_IMG
-##        self.rotation = float(randint(-359,0))
-##        self.image = transform.rotate(self.image,self.rotation)
+        self.image = BALL_IMG
+        self.rotation = float(randint(-359,0))
+        self.image = transform.rotate(self.image,self.rotation)
 
         """ This sets up a few coordinates like top, left, center, bottom left""" 
         self.rect = self.image.get_rect()
         self.rect.center = (randint(LEFT,RIGHT),randint(TOP, BOTTOM))
         self.direction = direction
         self.speed = BALL_SPEED
-        """ Not sure you can add sprite to group within the init, but it would
-        be very useful! """
-      
+
+        ## sfx
+        mixer.Channel(1).play(NEW_BALL,1)
+              
     """ The update section changes the sprite between frames. Useful for movements """
     def update(self,keys):
         """ This handles the multiball in Quad Pong """
@@ -84,19 +85,22 @@ class Ball(sprite.Sprite):
     def draw(self):
         SCREEN.blit(self.image, self.rect)
 
+##    def kill(self):
+##        SFX_CH.play(BLOB_EATEN,1)
+
 class BG_Square(sprite.Sprite):
 
     def __init__(self):
         sprite.Sprite.__init__(self)
         self.size = randint(5,100)
-        self.image = Surface((self.size, self.size))
-        self.image.fill((92, 205, 198))
-##        self.image = BG_SQUARE_IMG
+##        self.image = Surface((self.size, self.size))
+##        self.image.fill((92, 205, 198))
+        self.image = BG_SQUARE_IMG
         self.rect = self.image.get_rect()
         self.rect.center = (randint(0,WIDTH),randint(0,HEIGHT))
         self.direction =  DIRECTIONS[randint(0,7)]
-##        self.size = randint(5,100)
-##        self.image = transform.scale(self.image, (self.size,self.size))
+        self.size = randint(5,100)
+        self.image = transform.scale(self.image, (self.size,self.size))
         self.speed = randint(1,4)
 
     def update(self,keys):
@@ -122,12 +126,15 @@ class Collectable (sprite.Sprite):
 
     def __init__(self, _type):
         sprite.Sprite.__init__(self)
-##        self.image = BLOB_LRG_ALT_IMG
-        self.image = Surface((2 * BLOB_SIZE, 2 * BLOB_SIZE))
-        self.image.fill((240, 140, 160))
+        self.image = BLOB_LRG_ALT_IMG
+##        self.image = Surface((2 * BLOB_SIZE, 2 * BLOB_SIZE))
+##        self.image.fill((240, 140, 160))
         self.rect = self.image.get_rect()
         self.rect.center = (randint(MARGIN, RIGHT), randint(TOP_MARGIN, BOTTOM))
         self.type = _type
+
+        ## sfx
+        mixer.Channel(1).play(NEW_BALLEATER,1)
 
     def draw(self):
         SCREEN.blit(self.image, self.rect)
@@ -137,9 +144,9 @@ class Blob(sprite.Sprite):
 
     def __init__(self):
         sprite.Sprite.__init__(self)
-        self.image = Surface((BLOB_SIZE, BLOB_SIZE))
-        self.image.fill(BLOB_COLOR)
-##        self.image = BLOB_IMG
+##        self.image = Surface((BLOB_SIZE, BLOB_SIZE))
+##        self.image.fill(BLOB_COLOR)
+        self.image = BLOB_IMG
         self.rect = self.image.get_rect()
         self.rect.center = (randint(LEFT,RIGHT),randint(TOP, BOTTOM))
         self.speed = BLOB_SPEED
@@ -148,8 +155,11 @@ class Blob(sprite.Sprite):
         self.collected = None
         self.invincable = False
 
+        ## sfx
+        mixer.Channel(1).play(NEW_BLOB)
+
     def update(self,keys):
-        global do_tutorial, generate_balleater
+        global do_tutorial, generate_balleater, blobs
         if (keys[K_UP] or keys[K_w]) and self.rect.center[1] > TOP:
             #move up
             self.rect.y -= self.speed
@@ -181,21 +191,28 @@ class Blob(sprite.Sprite):
         if self.collected:
             if self.collected == "BallEater":
                 time_now = datetime.now()
-                if (time_now.microsecond % 200) <= 100:
-                    self.image = Surface((2 * BLOB_SIZE, 2 * BLOB_SIZE))
-                    self.image.fill(BLOB_COLOR)
+                if (time_now.microsecond % 500) <= 200:
+##                    self.image = Surface((2 * BLOB_SIZE, 2 * BLOB_SIZE))
+##                    self.image.fill(BLOB_COLOR)
+                    self.image = BLOB_LRG_IMG
                 else:
-                    self.image = Surface((2 * BLOB_SIZE, 2 * BLOB_SIZE))
-                    self.image.fill((240, 140, 160))
-
+##                    self.image = Surface((2 * BLOB_SIZE, 2 * BLOB_SIZE))
+##                    self.image.fill((240, 140, 160))
+                    self.image = BLOB_LRG_ALT_IMG
                 diff = time_now - self.collected_at
                 if diff.seconds >= 5:
                     self.collected = None
                     self.invincable = False
                     self.collected_at = None
-                    self.image = Surface((BLOB_SIZE, BLOB_SIZE))
-                    self.image.fill(BLOB_COLOR)
-    
+##                    self.image = Surface((BLOB_SIZE, BLOB_SIZE))
+##                    self.image.fill(BLOB_COLOR)
+                    self.image = BLOB_IMG
+                stop_sfx = True
+                for blob in blobs:
+                    if blob.collected == True:
+                        stop_sfx = False
+                if stop_sfx == True:
+                    COLLECTABLE_ACTIVE_CH.fadeout(2)
 
     """ draw puts the sprite on the screen """
     def draw(self):
@@ -273,7 +290,7 @@ class Player():
 
         
 class Game():
-    def __init__(self):
+    def __init__(self, do_tutorial):
         self.running = True
         self.paused = False
         self.countdown = True
@@ -287,12 +304,12 @@ class Game():
         self.game_over = False
         self.game_over_countdown_start = None
         self.first_time = True
-        self.do_tutorial = True
+        self.do_tutorial = do_tutorial
         self.tutorial= False
         self.tutorial_start = None
         self.tutorial_balleater = False
         self.tutorial_step = (0,0)
-        self.tutorial_running = True
+        self.tutorial_running = do_tutorial
         self.top_msg = ""
         
         

@@ -5,19 +5,20 @@ from pygame import *
 
 ## local files
 HOME_FOLDER = path.dirname(__file__)
-##IMG_FOLDER = path.join(HOME_FOLDER,"img")
+IMG_FOLDER = path.join(HOME_FOLDER,"img")
 MP3_FOLDER = path.join(HOME_FOLDER,"mp3")
 BG_MUSIC_FOLDER = path.join(MP3_FOLDER,"bg_music")
+SFX_FOLDER = path.join(MP3_FOLDER,"sfx")
 
 ## images
-##def load_img(img_fn):
-##    return image.load(path.join(IMG_FOLDER,img_fn))
-##ICON_IMG = load_img("blob.png")
-##BLOB_IMG = load_img("blob.png")
-##BLOB_LRG_IMG = load_img("blob_lrg.png")
-##BLOB_LRG_ALT_IMG = load_img("blob_lrg_alt.png")
-##BALL_IMG = load_img("ball.png")
-##BG_SQUARE_IMG = load_img("square.png")
+def load_img(img_fn):
+    return image.load(path.join(IMG_FOLDER,img_fn))
+ICON_IMG = load_img("blob.png")
+BLOB_IMG = load_img("blob.png")
+BLOB_LRG_IMG = load_img("blob_lrg.png")
+BLOB_LRG_ALT_IMG = load_img("blob_lrg_alt.png")
+BALL_IMG = load_img("ball.png")
+BG_SQUARE_IMG = load_img("square.png")
 
 ## title
 TITLE = "Blob Dodger"
@@ -44,7 +45,7 @@ SCREEN = display.set_mode(SCREEN_SIZE)
 
 #pygame.display
 display.set_caption(TITLE)
-##display.set_icon(ICON_IMG)
+display.set_icon(ICON_IMG)
 
 FPS = 60
 
@@ -114,6 +115,27 @@ TITLE_POS = (TITLE_X, TITLE_Y)
 # init
 mixer.init()
 SUPERDRUMS = path.join(BG_MUSIC_FOLDER,"superdrumloop.wav")
+NEW_BLOB_SFX = path.join(SFX_FOLDER,"new_blob.wav")
+NEW_BALL_SFX = path.join(SFX_FOLDER,"new_ball.wav")
+BALLEATER_ACTIVE_SFX = path.join(SFX_FOLDER,"balleater_active.wav")
+LOSE_LIFE_SFX = path.join(SFX_FOLDER,"lose_life.wav")
+BALL_EATEN_SFX = path.join(SFX_FOLDER,"ball_eaten.wav")
+BLOB_EATEN_SFX = path.join(SFX_FOLDER,"blob_eaten.wav")
+NEW_BALLEATER_SFX = path.join(SFX_FOLDER,"new_balleater.wav")
+
+BG_MUSIC = mixer.Sound(SUPERDRUMS)
+NEW_BLOB = mixer.Sound(NEW_BLOB_SFX)
+NEW_BALL = mixer.Sound(NEW_BALL_SFX)
+BALLEATER_ACTIVE = mixer.Sound(BALLEATER_ACTIVE_SFX)
+LOSE_LIFE = mixer.Sound(LOSE_LIFE_SFX)
+BALL_EATEN = mixer.Sound(BALL_EATEN_SFX)
+BLOB_EATEN = mixer.Sound(BLOB_EATEN_SFX)
+NEW_BALLEATER = mixer.Sound(NEW_BALLEATER_SFX)
+
+
+BG_MUSIC_CH = mixer.Channel(0)
+SFX_CH = mixer.Channel(1)
+COLLECTABLE_ACTIVE_CH = mixer.Channel(2)
 
 
 ## ----------- QUANTITIES ----------
@@ -182,10 +204,10 @@ steps = [
             "msg":"All blobs move in parallel"
         },{
            "timer":1.5,
-            "msg":"New one every 1,000 points"
+            "msg":"New ball every 1,000 points"
         },{
            "timer":1.5,
-            "msg":"More points if you've got more blobs"
+            "msg":"Points go up quicker each time"
         },{
             "timer":1.5,
             "msg":"Ok, go!"
@@ -193,19 +215,19 @@ steps = [
     ],[
         {
            "timer":1.5,
-            "msg":"Now there's another ball"
+            "msg":"Uh-oh, now there's another ball"
         },{
            "timer":1.5,
-            "msg":"Starts to get tricky now"
+            "msg":"Starting to get tricky!"
         },{
            "timer":1.5,
-            "msg":"New one every 1,000 points"
+            "msg":"New ball every 1,000 points"
         },{
            "timer":1.5,
             "msg":"Ready to get dodging?"
         },{
             "timer":1.5,
-            "msg":"Ok, go!"
+            "msg":"Ok,let's go!"
         }
     ],[
         {
@@ -225,7 +247,7 @@ steps = [
             "msg":"Remember what happens every 1,000 points!"
         },{
             "timer":1.5,
-            "msg":"Ok, go!"
+            "msg":"Ok, it's dodging time!"
         }
     ]
 ]

@@ -29,13 +29,19 @@ from sprites import *
 
 ## ------------------ FUNCTIONS ---------------------
 ## initialise variables
-def init(run_main = True, mode = randint(0,3)):
+def init(run_main = True):
     
-    global game, player, all_sprites
+    global game, player, all_sprites, do_tutorial
     for sprite in all_sprites:
         sprite.kill()
     bg_music()
-    game = Game()
+    if game:
+        print("got game")
+        game = Game(True)
+    else:
+        print("ain't got game")
+        game = Game(False)
+        
     player = Player()
     bg_squares = BG_SQUARE_START
     while bg_squares > 0:
@@ -50,8 +56,8 @@ def init(run_main = True, mode = randint(0,3)):
 
 ## bg music
 def bg_music():
-    mixer.music.load(SUPERDRUMS)
-    mixer.music.play(-1)
+    BG_MUSIC_CH.set_volume(40)
+    BG_MUSIC_CH.play(BG_MUSIC,-1)
     
 
 ## update sprites
@@ -174,7 +180,7 @@ def tutorial(keys):
         tut_stg = game.tutorial_step[0]
         tut_step = game.tutorial_step[1]
         if keys[K_x]:
-            #game.tutorial_step = (game.tutorial_step[0] + 1,0)
+            game.tutorial_step = (game.tutorial_step[0],0)
             game.tutorial_running = False
             game.msg = ""
             game.top_msg = ""
@@ -220,9 +226,11 @@ def main():
             game.tutorial_running = True
 
         if game.first_time and game.tutorial_step == (0,0) and do_tutorial:
+            #print(game.first_time, game.tutorial_step, do_tutorial)
             game.tutorial_running = True
 
         if game.tutorial_running:
+            print("tutorial running")
             tutorial(keys)
             
 
@@ -230,10 +238,11 @@ def main():
             game.tutorial_running = True
             game.tutorial_step = (3,0)
             first_balleater = False
+            print("first be")
             tutorial(keys)
 
         if keys[K_x]:
-            game.tutorial = False
+            game.do_tutorial = False
             game.tutorial_running = False
         
         if player.game_over:
@@ -329,7 +338,7 @@ def main():
                                 ball.kill()
                             game.new_ball = True
                             game.new_blob = True
-                            #player.score_increment += 1
+                            player.score_increment = 1
                             if player.lives > 0:
                                 game.countdown = True
                 

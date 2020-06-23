@@ -6,7 +6,7 @@ block_cipher = None
 a = Analysis(['blob_dodger.py'],
              pathex=['O:\\OneDrive\\repos\\Python\\Games\\blob_dodger_rects'],
              binaries=[],
-             datas=[('mp3/bg_music/*', 'mp3/bg_music/')],
+             datas=[('img/*', 'img/'), ('mp3/sfx/*', 'mp3/sfx/'), ('mp3/bg_music/*', 'mp3/bg_music/')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -30,4 +30,4 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False )
+          console=False , icon='img\\blob_dodge.ico')
